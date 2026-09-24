@@ -34,6 +34,7 @@ export class ListingRepo extends Context.Service<ListingRepo, {
   readonly create: (input: CreateListing) => Effect.Effect<Listing>
   readonly findById: (id: string) => Effect.Effect<Option.Option<Listing>>
   readonly update: (id: string, patch: UpdateListing) => Effect.Effect<Option.Option<Listing>>
+  readonly remove: (id: string) => Effect.Effect<boolean>
 }>()("ListingRepo") {}
 
 export const ListingRepoLive = Layer.effect(
@@ -86,6 +87,12 @@ export const ListingRepoLive = Layer.effect(
       )
     }
 
-    return { create, findById, update }
+    const remove = (id: string) =>
+      sql`DELETE FROM listings WHERE id = ${id} RETURNING id`.pipe(
+        Effect.map((rows) => rows.length > 0),
+        Effect.orDie
+      )
+
+    return { create, findById, update, remove }
   })
 )
