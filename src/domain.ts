@@ -90,5 +90,13 @@ export const SearchQuery = Schema.Struct({
     Schema.Finite.check(Schema.isGreaterThan(0), Schema.isLessThanOrEqualTo(MAX_RADIUS_KM))
   ),
   ...Pagination
-})
+}).check(
+  Schema.makeFilter((q) => {
+    const issues: Array<Schema.FilterIssue> = []
+    if (q.minPrice !== undefined && q.maxPrice !== undefined && q.minPrice > q.maxPrice) {
+      issues.push({ path: ["maxPrice"], issue: "maxPrice must be greater than or equal to minPrice" })
+    }
+    return issues
+  })
+)
 export type SearchQuery = typeof SearchQuery.Type
