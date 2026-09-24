@@ -28,7 +28,9 @@ const areas: ReadonlyArray<Area> = [
   { name: "Asokoro", city: "Abuja", lat: 9.0437, lng: 7.5277, yearlyRent: 9_000_000, salePrice: 350_000_000, nightlyRate: 120_000 },
   { name: "Wuse 2", city: "Abuja", lat: 9.0765, lng: 7.4735, yearlyRent: 5_000_000, salePrice: 160_000_000, nightlyRate: 75_000 },
   { name: "Gwarinpa", city: "Abuja", lat: 9.1082, lng: 7.4127, yearlyRent: 2_500_000, salePrice: 80_000_000, nightlyRate: 45_000 },
-  { name: "Jabi", city: "Abuja", lat: 9.0667, lng: 7.4333, yearlyRent: 3_500_000, salePrice: 120_000_000, nightlyRate: 60_000 }
+  { name: "Jabi", city: "Abuja", lat: 9.0667, lng: 7.4333, yearlyRent: 3_500_000, salePrice: 120_000_000, nightlyRate: 60_000 },
+  { name: "Bodija", city: "Ibadan", lat: 7.4352, lng: 3.9133, yearlyRent: 1_200_000, salePrice: 40_000_000, nightlyRate: 25_000 },
+  { name: "GRA Phase 2", city: "Port Harcourt", lat: 4.8242, lng: 7.0336, yearlyRent: 3_000_000, salePrice: 100_000_000, nightlyRate: 55_000 }
 ]
 
 const homeKinds = [
