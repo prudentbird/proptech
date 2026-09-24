@@ -27,3 +27,12 @@ I kept things simple and avoided extra layers I didn't need.
 - **Fast distance search without extra tools.** I used an extension that comes with PostgreSQL to index each listing's location. A search first picks out listings inside a rough box around the point, which is fast, then checks the exact distance. Results come back nearest first with their distance in km.
 - **Real database in tests.** The tests start the actual server and run against a real PostgreSQL database, so they check what users will actually get.
 - **Checks in two places.** The API rejects bad input, and the database has the same rules, so bad data can't get in another way.
+
+## What I'd improve with more time
+
+- Replace page numbers with cursor-based paging, so deep scrolling through results stays fast.
+- Cache popular searches and add rate limiting, so the API doesn't get overwhelmed.
+- Add a dedicated search engine for text search and filters, keeping PostgreSQL as the source of truth.
+- Support searching by neighbourhood or by drawing an area on a map using PostGIS.
+- Add auth and authz, so a listing's agent comes from the signed-in user and only they can edit it.
+- Add tracing and logging using OTEL to make debugging and monitoring easy.
