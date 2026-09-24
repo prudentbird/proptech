@@ -1,4 +1,5 @@
 import { Effect, Layer, Option, SchemaIssue } from "effect"
+import { HttpRouter } from "effect/unstable/http"
 import { HttpApiBuilder, HttpApiMiddleware, HttpApiScalar } from "effect/unstable/httpapi"
 import { Api, RequestValidation } from "./api.ts"
 import { ListingNotFound, pageMeta, ValidationError } from "./domain.ts"
@@ -74,5 +75,6 @@ export const ApiLive = Layer.mergeAll(
   HttpApiScalar.layer(Api, { path: "/docs" })
 ).pipe(
   Layer.provide([ListingsLive, HealthLive]),
-  Layer.provide(RequestValidationLive)
+  Layer.provide(RequestValidationLive),
+  Layer.provide(HttpRouter.cors())
 )
