@@ -60,4 +60,5 @@ export class Api extends HttpApi.make("proptech")
   .add(ListingsGroup)
   .add(HealthGroup)
   .middleware(RequestValidation)
+  .annotate(HttpApi.ParseOptions, { errors: "all" })
 {}
