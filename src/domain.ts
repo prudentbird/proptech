@@ -133,3 +133,12 @@ export class ListingNotFound extends Schema.TaggedError<ListingNotFound>()(
   { id: Schema.String, message: Schema.String },
   { httpApiStatus: 404 }
 ) {}
+
+export class ValidationError extends Schema.TaggedError<ValidationError>()(
+  "ValidationError",
+  {
+    message: Schema.String,
+    issues: Schema.Array(Schema.Struct({ path: Schema.String, message: Schema.String }))
+  },
+  { httpApiStatus: 400 }
+) {}
