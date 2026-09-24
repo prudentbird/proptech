@@ -107,3 +107,23 @@ export const SearchQuery = Schema.Struct({
   })
 )
 export type SearchQuery = typeof SearchQuery.Type
+
+export const PageMeta = Schema.Struct({
+  page: Schema.Number,
+  pageSize: Schema.Number,
+  total: Schema.Number,
+  totalPages: Schema.Number
+})
+
+export const ListingPage = Schema.Struct({
+  data: Schema.Array(Listing),
+  meta: PageMeta
+})
+export type ListingPage = typeof ListingPage.Type
+
+export const pageMeta = (page: number, pageSize: number, total: number): typeof PageMeta.Type => ({
+  page,
+  pageSize,
+  total,
+  totalPages: Math.ceil(total / pageSize)
+})
