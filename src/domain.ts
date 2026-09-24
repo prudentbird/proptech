@@ -127,3 +127,9 @@ export const pageMeta = (page: number, pageSize: number, total: number): typeof 
   total,
   totalPages: Math.ceil(total / pageSize)
 })
+
+export class ListingNotFound extends Schema.TaggedError<ListingNotFound>()(
+  "ListingNotFound",
+  { id: Schema.String, message: Schema.String },
+  { httpApiStatus: 404 }
+) {}
