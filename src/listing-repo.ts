@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Option } from "effect"
 import { SqlClient } from "effect/unstable/sql"
-import type { CreateListing, Listing, ListingType, UpdateListing } from "./domain.ts"
+import type { CreateListing, Listing, ListingType, SearchQuery, UpdateListing } from "./domain.ts"
 
 interface ListingRow {
   readonly id: string
@@ -30,11 +30,17 @@ const toListing = (row: ListingRow): Listing => ({
   ...(row.distanceKm === undefined ? {} : { distanceKm: Math.round(row.distanceKm * 1000) / 1000 })
 })
 
+export interface SearchResult {
+  readonly listings: ReadonlyArray<Listing>
+  readonly total: number
+}
+
 export class ListingRepo extends Context.Service<ListingRepo, {
   readonly create: (input: CreateListing) => Effect.Effect<Listing>
   readonly findById: (id: string) => Effect.Effect<Option.Option<Listing>>
   readonly update: (id: string, patch: UpdateListing) => Effect.Effect<Option.Option<Listing>>
   readonly remove: (id: string) => Effect.Effect<boolean>
+  readonly search: (query: Partial<SearchQuery> & Pick<SearchQuery, "page" | "pageSize">) => Effect.Effect<SearchResult>
 }>()("ListingRepo") {}
 
 export const ListingRepoLive = Layer.effect(
@@ -93,6 +99,30 @@ export const ListingRepoLive = Layer.effect(
         Effect.orDie
       )
 
-    return { create, findById, update, remove }
+    const search = (q: Partial<SearchQuery> & Pick<SearchQuery, "page" | "pageSize">) => {
+      const conditions = []
+      if (q.type !== undefined) conditions.push(sql`type = ${q.type}`)
+      if (q.minPrice !== undefined) conditions.push(sql`price >= ${q.minPrice}`)
+      if (q.maxPrice !== undefined) conditions.push(sql`price <= ${q.maxPrice}`)
+      if (q.minBedrooms !== undefined) conditions.push(sql`bedrooms >= ${q.minBedrooms}`)
+      if (q.maxBedrooms !== undefined) conditions.push(sql`bedrooms <= ${q.maxBedrooms}`)
+
+      const where = conditions.length > 0 ? sql`WHERE ${sql.and(conditions)}` : sql``
+      const offset = (q.page - 1) * q.pageSize
+
+      return Effect.all({
+        rows: sql<ListingRow>`
+          SELECT * FROM listings ${where}
+          ORDER BY created_at DESC, id DESC
+          LIMIT ${q.pageSize} OFFSET ${offset}
+        `,
+        count: sql<{ readonly total: bigint }>`SELECT count(*) AS total FROM listings ${where}`
+      }, { concurrency: 2 }).pipe(
+        Effect.map(({ count, rows }) => ({ listings: rows.map(toListing), total: Number(count[0]!.total) })),
+        Effect.orDie
+      )
+    }
+
+    return { create, findById, update, remove, search }
   })
 )
