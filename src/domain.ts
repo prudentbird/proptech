@@ -99,6 +99,10 @@ export const SearchQuery = Schema.Struct({
     if (q.minBedrooms !== undefined && q.maxBedrooms !== undefined && q.minBedrooms > q.maxBedrooms) {
       issues.push({ path: ["maxBedrooms"], issue: "maxBedrooms must be greater than or equal to minBedrooms" })
     }
+    const geo = [q.lat, q.lng, q.radiusKm].filter((v) => v !== undefined).length
+    if (geo !== 0 && geo !== 3) {
+      issues.push({ path: ["radiusKm"], issue: "lat, lng and radiusKm must be provided together" })
+    }
     return issues
   })
 )
