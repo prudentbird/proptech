@@ -162,5 +162,15 @@ layer(TestLive)("Listings API", (it) => {
         expect(titles(wider)).toContain("Studio in Yaba")
         expect(titles(wider)).not.toContain("Duplex in Maitama")
       }))
+
+    it.effect("combines geo and attribute filters", () =>
+      Effect.gen(function*() {
+        const client = yield* seed
+        const result = yield* client.listings.search({
+          query: { ...lekki, radiusKm: 15, type: "rent", maxBedrooms: 1, page: 1, pageSize: 20 }
+        })
+        expect(titles(result)).toEqual(["Studio in Yaba"])
+        expect(result.meta.total).toBe(1)
+      }))
   })
 })
