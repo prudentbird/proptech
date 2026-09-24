@@ -18,6 +18,13 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
             onSome: Effect.succeed
           }))
         ))
+      .handle("update", ({ params, payload }) =>
+        repo.update(params.id, payload).pipe(
+          Effect.flatMap(Option.match({
+            onNone: () => Effect.fail(notFound(params.id)),
+            onSome: Effect.succeed
+          }))
+        ))
   }))
 
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(

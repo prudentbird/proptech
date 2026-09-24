@@ -3,7 +3,8 @@ import {
   CreateListing,
   Listing,
   ListingId,
-  ListingNotFound
+  ListingNotFound,
+  UpdateListing
 } from "./domain.ts"
 
 const IdParams = { id: ListingId }
@@ -16,6 +17,12 @@ export class ListingsGroup extends HttpApiGroup.make("listings")
     }),
     HttpApiEndpoint.get("get", "/listings/:id", {
       params: IdParams,
+      success: Listing,
+      error: ListingNotFound
+    }),
+    HttpApiEndpoint.patch("update", "/listings/:id", {
+      params: IdParams,
+      payload: UpdateListing,
       success: Listing,
       error: ListingNotFound
     })
