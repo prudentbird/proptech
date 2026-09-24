@@ -3,6 +3,8 @@ import { Migrator, SqlClient } from "effect/unstable/sql"
 
 const createListings = Effect.gen(function*() {
   const sql = yield* SqlClient.SqlClient
+  yield* sql`CREATE EXTENSION IF NOT EXISTS cube`
+  yield* sql`CREATE EXTENSION IF NOT EXISTS earthdistance`
   yield* sql`
     CREATE TABLE listings (
       id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,6 +24,7 @@ const createListings = Effect.gen(function*() {
   yield* sql`CREATE INDEX listings_bedrooms_idx ON listings (bedrooms)`
   yield* sql`CREATE INDEX listings_agent_id_idx ON listings (agent_id)`
   yield* sql`CREATE INDEX listings_created_at_idx ON listings (created_at DESC, id DESC)`
+  yield* sql`CREATE INDEX listings_location_idx ON listings USING gist (ll_to_earth(lat, lng))`
 })
 
 export const runMigrations = Migrator.make({})({
