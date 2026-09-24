@@ -25,6 +25,10 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
             onSome: Effect.succeed
           }))
         ))
+      .handle("delete", ({ params }) =>
+        repo.remove(params.id).pipe(
+          Effect.flatMap((deleted) => deleted ? Effect.void : Effect.fail(notFound(params.id)))
+        ))
   }))
 
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(

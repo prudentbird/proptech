@@ -25,6 +25,10 @@ export class ListingsGroup extends HttpApiGroup.make("listings")
       payload: UpdateListing,
       success: Listing,
       error: ListingNotFound
+    }),
+    HttpApiEndpoint.delete("delete", "/listings/:id", {
+      params: IdParams,
+      error: ListingNotFound
     })
   )
 {}
