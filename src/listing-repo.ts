@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect"
+import { Context, Effect, Layer, Option } from "effect"
 import { SqlClient } from "effect/unstable/sql"
 import type { CreateListing, Listing, ListingType } from "./domain.ts"
 
@@ -32,6 +32,7 @@ const toListing = (row: ListingRow): Listing => ({
 
 export class ListingRepo extends Context.Service<ListingRepo, {
   readonly create: (input: CreateListing) => Effect.Effect<Listing>
+  readonly findById: (id: string) => Effect.Effect<Option.Option<Listing>>
 }>()("ListingRepo") {}
 
 export const ListingRepoLive = Layer.effect(
@@ -56,6 +57,12 @@ export const ListingRepoLive = Layer.effect(
         RETURNING *
       `.pipe(Effect.map(([row]) => toListing(row!)), Effect.orDie)
 
-    return { create }
+    const findById = (id: string) =>
+      sql<ListingRow>`SELECT * FROM listings WHERE id = ${id}`.pipe(
+        Effect.map((rows) => Option.fromNullishOr(rows[0]).pipe(Option.map(toListing))),
+        Effect.orDie
+      )
+
+    return { create, findById }
   })
 )
