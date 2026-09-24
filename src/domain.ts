@@ -41,3 +41,21 @@ export const UpdateListing = Schema.Struct({
   Schema.makeFilter((input) => Object.keys(input).length > 0 || "Provide at least one field to update")
 )
 export type UpdateListing = typeof UpdateListing.Type
+
+export const Listing = Schema.Struct({
+  id: ListingId,
+  title: Schema.String,
+  price: Schema.Number,
+  type: ListingType,
+  bedrooms: Schema.Number,
+  location: Schema.Struct({
+    lat: Schema.Number,
+    lng: Schema.Number,
+    address: Schema.NullOr(Schema.String)
+  }),
+  agentId: Schema.String,
+  createdAt: Schema.Date,
+  updatedAt: Schema.Date,
+  distanceKm: Schema.optionalKey(Schema.Number)
+})
+export type Listing = typeof Listing.Type
