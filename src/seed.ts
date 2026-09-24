@@ -23,7 +23,12 @@ const areas: ReadonlyArray<Area> = [
   { name: "Yaba", city: "Lagos", lat: 6.5095, lng: 3.3711, yearlyRent: 1_800_000, salePrice: 55_000_000, nightlyRate: 35_000 },
   { name: "Surulere", city: "Lagos", lat: 6.5009, lng: 3.3558, yearlyRent: 1_500_000, salePrice: 45_000_000, nightlyRate: 30_000 },
   { name: "Ikeja GRA", city: "Lagos", lat: 6.5833, lng: 3.35, yearlyRent: 4_500_000, salePrice: 150_000_000, nightlyRate: 70_000 },
-  { name: "Gbagada", city: "Lagos", lat: 6.5536, lng: 3.3886, yearlyRent: 2_000_000, salePrice: 60_000_000, nightlyRate: 40_000 }
+  { name: "Gbagada", city: "Lagos", lat: 6.5536, lng: 3.3886, yearlyRent: 2_000_000, salePrice: 60_000_000, nightlyRate: 40_000 },
+  { name: "Maitama", city: "Abuja", lat: 9.082, lng: 7.4951, yearlyRent: 10_000_000, salePrice: 400_000_000, nightlyRate: 130_000 },
+  { name: "Asokoro", city: "Abuja", lat: 9.0437, lng: 7.5277, yearlyRent: 9_000_000, salePrice: 350_000_000, nightlyRate: 120_000 },
+  { name: "Wuse 2", city: "Abuja", lat: 9.0765, lng: 7.4735, yearlyRent: 5_000_000, salePrice: 160_000_000, nightlyRate: 75_000 },
+  { name: "Gwarinpa", city: "Abuja", lat: 9.1082, lng: 7.4127, yearlyRent: 2_500_000, salePrice: 80_000_000, nightlyRate: 45_000 },
+  { name: "Jabi", city: "Abuja", lat: 9.0667, lng: 7.4333, yearlyRent: 3_500_000, salePrice: 120_000_000, nightlyRate: 60_000 }
 ]
 
 const homeKinds = [
