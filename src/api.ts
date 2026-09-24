@@ -1,5 +1,5 @@
 import { Schema } from "effect"
-import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "effect/unstable/httpapi"
+import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiMiddleware, HttpApiSchema } from "effect/unstable/httpapi"
 import {
   CreateListing,
   Listing,
@@ -8,7 +8,8 @@ import {
   ListingPage,
   ListQuery,
   SearchQuery,
-  UpdateListing
+  UpdateListing,
+  ValidationError
 } from "./domain.ts"
 
 const IdParams = { id: ListingId }
@@ -51,7 +52,12 @@ export class HealthGroup extends HttpApiGroup.make("health").add(
   })
 ) {}
 
+export class RequestValidation extends HttpApiMiddleware.Service<RequestValidation>()("RequestValidation", {
+  error: ValidationError
+}) {}
+
 export class Api extends HttpApi.make("proptech")
   .add(ListingsGroup)
   .add(HealthGroup)
+  .middleware(RequestValidation)
 {}

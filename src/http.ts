@@ -1,7 +1,7 @@
-import { Effect, Layer, Option } from "effect"
-import { HttpApiBuilder } from "effect/unstable/httpapi"
-import { Api } from "./api.ts"
-import { ListingNotFound, pageMeta } from "./domain.ts"
+import { Effect, Layer, Option, SchemaIssue } from "effect"
+import { HttpApiBuilder, HttpApiMiddleware } from "effect/unstable/httpapi"
+import { Api, RequestValidation } from "./api.ts"
+import { ListingNotFound, pageMeta, ValidationError } from "./domain.ts"
 import { ListingRepo } from "./listing-repo.ts"
 
 const notFound = (id: string) => new ListingNotFound({ id, message: `Listing ${id} not found` })
@@ -48,6 +48,28 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
 const HealthLive = HttpApiBuilder.group(Api, "health", (handlers) =>
   handlers.handle("health", () => Effect.succeed({ status: "ok" as const })))
 
+const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1()
+
+const formatPath = (path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }> | undefined) =>
+  (path ?? []).map((segment) => String(typeof segment === "object" ? segment.key : segment)).join(".")
+
+const RequestValidationLive = HttpApiMiddleware.layerSchemaErrorTransform(
+  RequestValidation,
+  (error) =>
+    error.kind === "Body" || error.kind === "ResponseHeaders"
+      ? Effect.fail(error)
+      : Effect.fail(
+        new ValidationError({
+          message: `Invalid request ${error.kind.toLowerCase()}`,
+          issues: formatIssues(error.cause.issue).issues.map((issue) => ({
+            path: formatPath(issue.path),
+            message: issue.message
+          }))
+        })
+      )
+)
+
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(
-  Layer.provide([ListingsLive, HealthLive])
+  Layer.provide([ListingsLive, HealthLive]),
+  Layer.provide(RequestValidationLive)
 )
