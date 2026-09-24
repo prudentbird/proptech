@@ -107,13 +107,26 @@ export const ListingRepoLive = Layer.effect(
       if (q.minBedrooms !== undefined) conditions.push(sql`bedrooms >= ${q.minBedrooms}`)
       if (q.maxBedrooms !== undefined) conditions.push(sql`bedrooms <= ${q.maxBedrooms}`)
 
+      const geo = q.lat !== undefined && q.lng !== undefined && q.radiusKm !== undefined
+        ? { origin: sql`ll_to_earth(${q.lat}::float8, ${q.lng}::float8)`, radiusM: q.radiusKm * 1000 }
+        : undefined
+
+      if (geo) {
+        conditions.push(sql`earth_box(${geo.origin}, ${geo.radiusM}::float8) @> ll_to_earth(lat, lng)`)
+        conditions.push(sql`earth_distance(${geo.origin}, ll_to_earth(lat, lng)) <= ${geo.radiusM}::float8`)
+      }
+
       const where = conditions.length > 0 ? sql`WHERE ${sql.and(conditions)}` : sql``
+      const distance = geo
+        ? sql`, earth_distance(${geo.origin}, ll_to_earth(lat, lng)) / 1000 AS distance_km`
+        : sql``
+      const orderBy = geo ? sql`ORDER BY distance_km ASC, id ASC` : sql`ORDER BY created_at DESC, id DESC`
       const offset = (q.page - 1) * q.pageSize
 
       return Effect.all({
         rows: sql<ListingRow>`
-          SELECT * FROM listings ${where}
-          ORDER BY created_at DESC, id DESC
+          SELECT * ${distance} FROM listings ${where}
+          ${orderBy}
           LIMIT ${q.pageSize} OFFSET ${offset}
         `,
         count: sql<{ readonly total: bigint }>`SELECT count(*) AS total FROM listings ${where}`
