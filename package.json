@@ -1,0 +1,17 @@
+{
+  "name": "proptech",
+  "version": "1.0.0",
+  "description": "Property Listings API built with Effect and PostgreSQL",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.22.0",
+      "onFail": "download"
+    }
+  }
+}
