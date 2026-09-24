@@ -6,6 +6,7 @@ import {
   ListingNotFound,
   ListingPage,
   ListQuery,
+  SearchQuery,
   UpdateListing
 } from "./domain.ts"
 
@@ -19,6 +20,10 @@ export class ListingsGroup extends HttpApiGroup.make("listings")
     }),
     HttpApiEndpoint.get("list", "/listings", {
       query: ListQuery,
+      success: ListingPage
+    }),
+    HttpApiEndpoint.get("search", "/listings/search", {
+      query: SearchQuery,
       success: ListingPage
     }),
     HttpApiEndpoint.get("get", "/listings/:id", {

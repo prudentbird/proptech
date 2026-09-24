@@ -18,6 +18,13 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
             meta: pageMeta(query.page, query.pageSize, total)
           }))
         ))
+      .handle("search", ({ query }) =>
+        repo.search(query).pipe(
+          Effect.map(({ listings, total }) => ({
+            data: listings,
+            meta: pageMeta(query.page, query.pageSize, total)
+          }))
+        ))
       .handle("get", ({ params }) =>
         repo.findById(params.id).pipe(
           Effect.flatMap(Option.match({
