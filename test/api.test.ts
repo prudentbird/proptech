@@ -103,5 +103,17 @@ layer(TestLive)("Listings API", (it) => {
         const error = yield* client.listings.get({ params: { id: created.id } }).pipe(Effect.flip)
         assert.strictEqual(error._tag, "ListingNotFound")
       }))
+
+    it.effect("returns 404 for unknown ids on get, update and delete", () =>
+      Effect.gen(function*() {
+        const client = yield* setup
+        const id = "00000000-0000-4000-8000-000000000000"
+        const errors = yield* Effect.all([
+          client.listings.get({ params: { id } }).pipe(Effect.flip),
+          client.listings.update({ params: { id }, payload: { price: 1 } }).pipe(Effect.flip),
+          client.listings.delete({ params: { id } }).pipe(Effect.flip)
+        ])
+        expect(errors.map((e) => e._tag)).toEqual(["ListingNotFound", "ListingNotFound", "ListingNotFound"])
+      }))
   })
 })
