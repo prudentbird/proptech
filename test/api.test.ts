@@ -80,5 +80,19 @@ layer(TestLive)("Listings API", (it) => {
         const fetched = yield* client.listings.get({ params: { id: created.id } })
         expect(fetched).toEqual(created)
       }))
+
+    it.effect("updates a listing partially", () =>
+      Effect.gen(function*() {
+        const client = yield* setup
+        const created = yield* client.listings.create({ payload: fixtures.lekki! })
+        const updated = yield* client.listings.update({
+          params: { id: created.id },
+          payload: { price: 5_000_000, location: { lat: 6.45, lng: 3.47 } }
+        })
+        expect(updated.price).toBe(5_000_000)
+        expect(updated.title).toBe(created.title)
+        expect(updated.location).toEqual({ lat: 6.45, lng: 3.47, address: "Admiralty Way" })
+        expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(created.updatedAt.getTime())
+      }))
   })
 })
