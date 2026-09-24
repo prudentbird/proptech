@@ -136,4 +136,18 @@ layer(TestLive)("Listings API", (it) => {
         expect(titles(second)).toEqual(["3 Bed Flat in Lekki Phase 1"])
       }))
   })
+
+  describe("search", () => {
+    it.effect("filters by type, price range and bedrooms", () =>
+      Effect.gen(function*() {
+        const client = yield* seed
+        const rent = yield* client.listings.search({ query: { type: "rent", page: 1, pageSize: 20 } })
+        expect(titles(rent).sort()).toEqual(["3 Bed Flat in Lekki Phase 1", "Studio in Yaba"])
+
+        const midPrice = yield* client.listings.search({
+          query: { minPrice: 1_000_000, maxPrice: 5_000_000, minBedrooms: 2, page: 1, pageSize: 20 }
+        })
+        expect(titles(midPrice)).toEqual(["3 Bed Flat in Lekki Phase 1"])
+      }))
+  })
 })
