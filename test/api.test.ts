@@ -208,5 +208,11 @@ layer(TestLive)("Listings API", (it) => {
         const error = yield* rejectRequest(HttpClientRequest.get("/listings/search?minPrice=10&maxPrice=5&lat=6.4"))
         expect(paths(error)).toEqual(["maxPrice", "radiusKm"])
       }))
+
+    it.effect("rejects malformed ids", () =>
+      Effect.gen(function*() {
+        const error = yield* rejectRequest(HttpClientRequest.get("/listings/not-a-uuid"))
+        expect(error.issues).toEqual([{ path: "id", message: "Expected a UUID" }])
+      }))
   })
 })
