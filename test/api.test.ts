@@ -194,5 +194,13 @@ layer(TestLive)("Listings API", (it) => {
         )
         expect(paths(error)).toEqual(["agentId", "location.lat", "price", "title", "type"])
       }))
+
+    it.effect("rejects invalid search parameters", () =>
+      Effect.gen(function*() {
+        const error = yield* rejectRequest(
+          HttpClientRequest.get("/listings/search?minPrice=10&maxPrice=5&lat=6.4&pageSize=abc")
+        )
+        expect(paths(error)).toContain("pageSize")
+      }))
   })
 })
