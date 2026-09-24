@@ -1,12 +1,12 @@
 import { NodeHttpServer } from "@effect/platform-node"
 import { assert, describe, expect, layer } from "@effect/vitest"
-import { Config, Effect, Layer, Redacted } from "effect"
-import { HttpRouter } from "effect/unstable/http"
+import { Config, Effect, Layer, Redacted, Schema } from "effect"
+import { HttpClient, HttpClientRequest, HttpRouter } from "effect/unstable/http"
 import { HttpApiClient } from "effect/unstable/httpapi"
 import { SqlClient } from "effect/unstable/sql"
 import { Api } from "../src/api.ts"
 import { DatabaseLive } from "../src/database.ts"
-import type { CreateListing } from "../src/domain.ts"
+import { type CreateListing, ValidationError } from "../src/domain.ts"
 import { ApiLive } from "../src/http.ts"
 import { ListingRepoLive } from "../src/listing-repo.ts"
 
@@ -171,6 +171,28 @@ layer(TestLive)("Listings API", (it) => {
         })
         expect(titles(result)).toEqual(["Studio in Yaba"])
         expect(result.meta.total).toBe(1)
+      }))
+  })
+
+  describe("validation", () => {
+    const rejectRequest = (request: HttpClientRequest.HttpClientRequest) =>
+      Effect.gen(function*() {
+        const response = yield* HttpClient.execute(request)
+        expect(response.status).toBe(400)
+        return yield* Schema.decodeUnknownEffect(ValidationError)(yield* response.json)
+      })
+
+    const paths = (error: ValidationError) => error.issues.map((issue) => issue.path).sort()
+
+    it.effect("rejects an invalid payload with every issue listed", () =>
+      Effect.gen(function*() {
+        yield* setup
+        const error = yield* rejectRequest(
+          HttpClientRequest.post("/listings").pipe(
+            HttpClientRequest.bodyJsonUnsafe({ title: "x", price: -5, type: "villa", bedrooms: 2, location: { lat: 95, lng: 3 } })
+          )
+        )
+        expect(paths(error)).toEqual(["agentId", "location.lat", "price", "title", "type"])
       }))
   })
 })
