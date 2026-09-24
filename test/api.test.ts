@@ -149,5 +149,18 @@ layer(TestLive)("Listings API", (it) => {
         })
         expect(titles(midPrice)).toEqual(["3 Bed Flat in Lekki Phase 1"])
       }))
+
+    it.effect("returns listings within the radius, nearest first, with distance", () =>
+      Effect.gen(function*() {
+        const client = yield* seed
+        const nearby = yield* client.listings.search({ query: { ...lekki, radiusKm: 10, page: 1, pageSize: 20 } })
+        expect(titles(nearby)).toEqual(["3 Bed Flat in Lekki Phase 1", "Shortlet in Victoria Island"])
+        expect(nearby.data[0]!.distanceKm).toBe(0)
+        expect(nearby.data[1]!.distanceKm).toBeCloseTo(6, 0)
+
+        const wider = yield* client.listings.search({ query: { ...lekki, radiusKm: 15, page: 1, pageSize: 20 } })
+        expect(titles(wider)).toContain("Studio in Yaba")
+        expect(titles(wider)).not.toContain("Duplex in Maitama")
+      }))
   })
 })
