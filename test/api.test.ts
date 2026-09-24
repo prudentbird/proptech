@@ -69,6 +69,16 @@ const setup = Effect.gen(function*() {
   return client
 })
 
+const seed = Effect.gen(function*() {
+  const client = yield* setup
+  for (const payload of Object.values(fixtures)) {
+    yield* client.listings.create({ payload })
+  }
+  return client
+})
+
+const titles = (page: { readonly data: ReadonlyArray<{ readonly title: string }> }) => page.data.map((l) => l.title)
+
 layer(TestLive)("Listings API", (it) => {
   describe("CRUD", () => {
     it.effect("creates and fetches a listing", () =>
@@ -114,6 +124,16 @@ layer(TestLive)("Listings API", (it) => {
           client.listings.delete({ params: { id } }).pipe(Effect.flip)
         ])
         expect(errors.map((e) => e._tag)).toEqual(["ListingNotFound", "ListingNotFound", "ListingNotFound"])
+      }))
+
+    it.effect("paginates newest first", () =>
+      Effect.gen(function*() {
+        const client = yield* seed
+        const first = yield* client.listings.list({ query: { page: 1, pageSize: 3 } })
+        const second = yield* client.listings.list({ query: { page: 2, pageSize: 3 } })
+        expect(first.meta).toEqual({ page: 1, pageSize: 3, total: 4, totalPages: 2 })
+        expect(titles(first)).toEqual(["Duplex in Maitama", "Studio in Yaba", "Shortlet in Victoria Island"])
+        expect(titles(second)).toEqual(["3 Bed Flat in Lekki Phase 1"])
       }))
   })
 })
