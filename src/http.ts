@@ -1,5 +1,5 @@
 import { Effect, Layer, Option, SchemaIssue } from "effect"
-import { HttpApiBuilder, HttpApiMiddleware } from "effect/unstable/httpapi"
+import { HttpApiBuilder, HttpApiMiddleware, HttpApiScalar } from "effect/unstable/httpapi"
 import { Api, RequestValidation } from "./api.ts"
 import { ListingNotFound, pageMeta, ValidationError } from "./domain.ts"
 import { ListingRepo } from "./listing-repo.ts"
@@ -69,7 +69,10 @@ const RequestValidationLive = HttpApiMiddleware.layerSchemaErrorTransform(
       )
 )
 
-export const ApiLive = HttpApiBuilder.layer(Api).pipe(
+export const ApiLive = Layer.mergeAll(
+  HttpApiBuilder.layer(Api, { openapiPath: "/openapi.json" }),
+  HttpApiScalar.layer(Api, { path: "/docs" })
+).pipe(
   Layer.provide([ListingsLive, HealthLive]),
   Layer.provide(RequestValidationLive)
 )
