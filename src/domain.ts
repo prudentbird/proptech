@@ -73,3 +73,22 @@ export const Pagination = {
 
 export const ListQuery = Schema.Struct(Pagination)
 export type ListQuery = typeof ListQuery.Type
+
+const NonNegative = Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0))
+
+export const MAX_RADIUS_KM = 500
+
+export const SearchQuery = Schema.Struct({
+  type: Schema.optionalKey(ListingType),
+  minPrice: Schema.optionalKey(NonNegative),
+  maxPrice: Schema.optionalKey(NonNegative),
+  minBedrooms: Schema.optionalKey(Bedrooms),
+  maxBedrooms: Schema.optionalKey(Bedrooms),
+  lat: Schema.optionalKey(Latitude),
+  lng: Schema.optionalKey(Longitude),
+  radiusKm: Schema.optionalKey(
+    Schema.Finite.check(Schema.isGreaterThan(0), Schema.isLessThanOrEqualTo(MAX_RADIUS_KM))
+  ),
+  ...Pagination
+})
+export type SearchQuery = typeof SearchQuery.Type
