@@ -7,6 +7,9 @@
   "engines": {
     "node": ">=24"
   },
+  "scripts": {
+    "typecheck": "tsc"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
