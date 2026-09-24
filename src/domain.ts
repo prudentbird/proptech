@@ -96,6 +96,9 @@ export const SearchQuery = Schema.Struct({
     if (q.minPrice !== undefined && q.maxPrice !== undefined && q.minPrice > q.maxPrice) {
       issues.push({ path: ["maxPrice"], issue: "maxPrice must be greater than or equal to minPrice" })
     }
+    if (q.minBedrooms !== undefined && q.maxBedrooms !== undefined && q.minBedrooms > q.maxBedrooms) {
+      issues.push({ path: ["maxBedrooms"], issue: "maxBedrooms must be greater than or equal to minBedrooms" })
+    }
     return issues
   })
 )
