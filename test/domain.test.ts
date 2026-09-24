@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest"
 import { Exit, Schema } from "effect"
-import { CreateListing } from "../src/domain.ts"
+import { CreateListing, UpdateListing } from "../src/domain.ts"
 
 const decode = <S extends Schema.Top & { readonly DecodingServices: never }>(schema: S) => (input: unknown) =>
   Schema.decodeUnknownExit(schema)(input, { errors: "all" })
@@ -30,5 +30,15 @@ describe("CreateListing", () => {
     ["blank agent", { agentId: "" }]
   ])("rejects %s", (_, override) => {
     expect(Exit.isFailure(decode(CreateListing)({ ...validListing, ...override }))).toBe(true)
+  })
+})
+
+describe("UpdateListing", () => {
+  it("rejects an empty patch", () => {
+    expect(Exit.isFailure(decode(UpdateListing)({}))).toBe(true)
+  })
+
+  it("accepts a partial patch", () => {
+    expect(Exit.isSuccess(decode(UpdateListing)({ price: 2_000_000 }))).toBe(true)
   })
 })
