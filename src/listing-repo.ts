@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Option } from "effect"
 import { SqlClient } from "effect/unstable/sql"
-import type { CreateListing, Listing, ListingType } from "./domain.ts"
+import type { CreateListing, Listing, ListingType, UpdateListing } from "./domain.ts"
 
 interface ListingRow {
   readonly id: string
@@ -33,6 +33,7 @@ const toListing = (row: ListingRow): Listing => ({
 export class ListingRepo extends Context.Service<ListingRepo, {
   readonly create: (input: CreateListing) => Effect.Effect<Listing>
   readonly findById: (id: string) => Effect.Effect<Option.Option<Listing>>
+  readonly update: (id: string, patch: UpdateListing) => Effect.Effect<Option.Option<Listing>>
 }>()("ListingRepo") {}
 
 export const ListingRepoLive = Layer.effect(
@@ -63,6 +64,28 @@ export const ListingRepoLive = Layer.effect(
         Effect.orDie
       )
 
-    return { create, findById }
+    const update = (id: string, patch: UpdateListing) => {
+      const fields: Record<string, unknown> = {}
+      if (patch.title !== undefined) fields.title = patch.title
+      if (patch.price !== undefined) fields.price = patch.price
+      if (patch.type !== undefined) fields.type = patch.type
+      if (patch.bedrooms !== undefined) fields.bedrooms = patch.bedrooms
+      if (patch.agentId !== undefined) fields.agentId = patch.agentId
+      if (patch.location !== undefined) {
+        fields.lat = patch.location.lat
+        fields.lng = patch.location.lng
+        if ("address" in patch.location) fields.address = patch.location.address ?? null
+      }
+      return sql<ListingRow>`
+        UPDATE listings SET ${sql.update(fields)}, updated_at = now()
+        WHERE id = ${id}
+        RETURNING *
+      `.pipe(
+        Effect.map((rows) => Option.fromNullishOr(rows[0]).pipe(Option.map(toListing))),
+        Effect.orDie
+      )
+    }
+
+    return { create, findById, update }
   })
 )
