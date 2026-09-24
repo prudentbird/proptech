@@ -1,4 +1,4 @@
-import { Schema } from "effect"
+import { Effect, Schema } from "effect"
 
 export const ListingType = Schema.Literals(["rent", "sale", "shortlet"])
 export type ListingType = typeof ListingType.Type
@@ -59,3 +59,17 @@ export const Listing = Schema.Struct({
   distanceKm: Schema.optionalKey(Schema.Number)
 })
 export type Listing = typeof Listing.Type
+
+export const DEFAULT_PAGE_SIZE = 20
+
+export const Pagination = {
+  page: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)).pipe(
+    Schema.withDecodingDefaultKey(Effect.succeed(1))
+  ),
+  pageSize: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 100 })).pipe(
+    Schema.withDecodingDefaultKey(Effect.succeed(DEFAULT_PAGE_SIZE))
+  )
+}
+
+export const ListQuery = Schema.Struct(Pagination)
+export type ListQuery = typeof ListQuery.Type
