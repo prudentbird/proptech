@@ -1,5 +1,5 @@
 import { NodeHttpServer } from "@effect/platform-node"
-import { describe, expect, layer } from "@effect/vitest"
+import { assert, describe, expect, layer } from "@effect/vitest"
 import { Config, Effect, Layer, Redacted } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { HttpApiClient } from "effect/unstable/httpapi"
@@ -93,6 +93,15 @@ layer(TestLive)("Listings API", (it) => {
         expect(updated.title).toBe(created.title)
         expect(updated.location).toEqual({ lat: 6.45, lng: 3.47, address: "Admiralty Way" })
         expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(created.updatedAt.getTime())
+      }))
+
+    it.effect("deletes a listing", () =>
+      Effect.gen(function*() {
+        const client = yield* setup
+        const created = yield* client.listings.create({ payload: fixtures.lekki! })
+        yield* client.listings.delete({ params: { id: created.id } })
+        const error = yield* client.listings.get({ params: { id: created.id } }).pipe(Effect.flip)
+        assert.strictEqual(error._tag, "ListingNotFound")
       }))
   })
 })
