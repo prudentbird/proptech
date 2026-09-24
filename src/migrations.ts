@@ -18,6 +18,9 @@ const createListings = Effect.gen(function*() {
       updated_at  timestamptz NOT NULL DEFAULT now()
     )
   `
+  yield* sql`CREATE INDEX listings_type_price_idx ON listings (type, price)`
+  yield* sql`CREATE INDEX listings_bedrooms_idx ON listings (bedrooms)`
+  yield* sql`CREATE INDEX listings_agent_id_idx ON listings (agent_id)`
 })
 
 export const runMigrations = Migrator.make({})({
