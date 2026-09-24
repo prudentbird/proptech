@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest"
 import { Exit, Schema } from "effect"
-import { CreateListing, UpdateListing } from "../src/domain.ts"
+import { CreateListing, SearchQuery, UpdateListing } from "../src/domain.ts"
 
 const decode = <S extends Schema.Top & { readonly DecodingServices: never }>(schema: S) => (input: unknown) =>
   Schema.decodeUnknownExit(schema)(input, { errors: "all" })
@@ -40,5 +40,30 @@ describe("UpdateListing", () => {
 
   it("accepts a partial patch", () => {
     expect(Exit.isSuccess(decode(UpdateListing)({ price: 2_000_000 }))).toBe(true)
+  })
+})
+
+describe("SearchQuery", () => {
+  it("defaults pagination", () => {
+    const exit = decode(SearchQuery)({})
+    expect(Exit.isSuccess(exit) && exit.value).toEqual({ page: 1, pageSize: 20 })
+  })
+
+  it("accepts a full geo + filter query", () => {
+    const query = { type: "sale", minPrice: 0, maxPrice: 10, minBedrooms: 1, maxBedrooms: 3, lat: 6.5, lng: 3.3, radiusKm: 5 }
+    expect(Exit.isSuccess(decode(SearchQuery)(query))).toBe(true)
+  })
+
+  it.each([
+    ["min price above max price", { minPrice: 10, maxPrice: 5 }],
+    ["min bedrooms above max bedrooms", { minBedrooms: 4, maxBedrooms: 2 }],
+    ["lat/lng without radius", { lat: 6.5, lng: 3.3 }],
+    ["radius without a point", { radiusKm: 5 }],
+    ["radius above the cap", { lat: 6.5, lng: 3.3, radiusKm: 501 }],
+    ["zero radius", { lat: 6.5, lng: 3.3, radiusKm: 0 }],
+    ["page size above 100", { pageSize: 101 }],
+    ["page 0", { page: 0 }]
+  ])("rejects %s", (_, query) => {
+    expect(Exit.isFailure(decode(SearchQuery)(query))).toBe(true)
   })
 })
