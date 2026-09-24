@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest"
 import { Exit, Schema } from "effect"
-import { CreateListing, SearchQuery, UpdateListing } from "../src/domain.ts"
+import { CreateListing, pageMeta, SearchQuery, UpdateListing } from "../src/domain.ts"
 
 const decode = <S extends Schema.Top & { readonly DecodingServices: never }>(schema: S) => (input: unknown) =>
   Schema.decodeUnknownExit(schema)(input, { errors: "all" })
@@ -65,5 +65,12 @@ describe("SearchQuery", () => {
     ["page 0", { page: 0 }]
   ])("rejects %s", (_, query) => {
     expect(Exit.isFailure(decode(SearchQuery)(query))).toBe(true)
+  })
+})
+
+describe("pageMeta", () => {
+  it("computes total pages", () => {
+    expect(pageMeta(1, 20, 0)).toEqual({ page: 1, pageSize: 20, total: 0, totalPages: 0 })
+    expect(pageMeta(2, 20, 41)).toEqual({ page: 2, pageSize: 20, total: 41, totalPages: 3 })
   })
 })
