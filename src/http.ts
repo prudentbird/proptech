@@ -45,6 +45,9 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
         ))
   }))
 
+const HealthLive = HttpApiBuilder.group(Api, "health", (handlers) =>
+  handlers.handle("health", () => Effect.succeed({ status: "ok" as const })))
+
 export const ApiLive = HttpApiBuilder.layer(Api).pipe(
-  Layer.provide(ListingsLive)
+  Layer.provide([ListingsLive, HealthLive])
 )

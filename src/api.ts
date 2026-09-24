@@ -1,3 +1,4 @@
+import { Schema } from "effect"
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "effect/unstable/httpapi"
 import {
   CreateListing,
@@ -44,6 +45,13 @@ export class ListingsGroup extends HttpApiGroup.make("listings")
   )
 {}
 
+export class HealthGroup extends HttpApiGroup.make("health").add(
+  HttpApiEndpoint.get("health", "/health", {
+    success: Schema.Struct({ status: Schema.Literal("ok") })
+  })
+) {}
+
 export class Api extends HttpApi.make("proptech")
   .add(ListingsGroup)
+  .add(HealthGroup)
 {}
