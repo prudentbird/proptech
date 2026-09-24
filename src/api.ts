@@ -4,6 +4,8 @@ import {
   Listing,
   ListingId,
   ListingNotFound,
+  ListingPage,
+  ListQuery,
   UpdateListing
 } from "./domain.ts"
 
@@ -14,6 +16,10 @@ export class ListingsGroup extends HttpApiGroup.make("listings")
     HttpApiEndpoint.post("create", "/listings", {
       payload: CreateListing,
       success: Listing.pipe(HttpApiSchema.status(201))
+    }),
+    HttpApiEndpoint.get("list", "/listings", {
+      query: ListQuery,
+      success: ListingPage
     }),
     HttpApiEndpoint.get("get", "/listings/:id", {
       params: IdParams,

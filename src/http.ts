@@ -1,7 +1,7 @@
 import { Effect, Layer, Option } from "effect"
 import { HttpApiBuilder } from "effect/unstable/httpapi"
 import { Api } from "./api.ts"
-import { ListingNotFound } from "./domain.ts"
+import { ListingNotFound, pageMeta } from "./domain.ts"
 import { ListingRepo } from "./listing-repo.ts"
 
 const notFound = (id: string) => new ListingNotFound({ id, message: `Listing ${id} not found` })
@@ -11,6 +11,13 @@ const ListingsLive = HttpApiBuilder.group(Api, "listings", (handlers) =>
     const repo = yield* ListingRepo
     return handlers
       .handle("create", ({ payload }) => repo.create(payload))
+      .handle("list", ({ query }) =>
+        repo.search(query).pipe(
+          Effect.map(({ listings, total }) => ({
+            data: listings,
+            meta: pageMeta(query.page, query.pageSize, total)
+          }))
+        ))
       .handle("get", ({ params }) =>
         repo.findById(params.id).pipe(
           Effect.flatMap(Option.match({
